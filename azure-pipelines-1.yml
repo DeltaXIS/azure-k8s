@@ -11,9 +11,13 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '584e0c63-2d05-43d0-8481-4eb9e773db66'
-  imageRepository: 'deltaxisclient'
   containerRegistry: 'deltak8s.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/client/Dockerfile'
+  imageRepositoryClient: 'deltaxisclient'
+  dockerfilePathClient: '$(Build.SourcesDirectory)/client/Dockerfile'
+  imageRepositoryWorker: 'deltaxisworker'
+  dockerfilePathWorker: '$(Build.SourcesDirectory)/worker/Dockerfile'
+  imageRepositoryServer: 'deltaxisserver'
+  dockerfilePathServer: '$(Build.SourcesDirectory)/server/Dockerfile'
   tag: '$(Build.BuildId)'
   
   # Agent VM image name
@@ -23,8 +27,8 @@ stages:
 - stage: Build
   displayName: Build and push stage
   jobs:  
-  - job: Build
-    displayName: Build
+  - job: Build Client
+    displayName: Build Client
     pool:
       vmImage: $(vmImageName)
     steps:
@@ -32,8 +36,36 @@ stages:
       displayName: Build and push an image to container registry
       inputs:
         command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
+        repository: $(imageRepositoryClient)
+        dockerfile: $(dockerfilePathClient)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+  - job: Build Server
+    displayName: Build Server
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryServer)
+        dockerfile: $(dockerfilePathServer)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+  - job: Build Worker
+    displayName: Build Worker
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryWorker)
+        dockerfile: $(dockerfilePathWorker)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
