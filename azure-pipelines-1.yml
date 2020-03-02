@@ -27,7 +27,7 @@ stages:
 - stage: Build
   displayName: Build and push stage
   jobs:  
-  - job: Build Client
+  - job: Build_Client
     displayName: Build Client
     pool:
       vmImage: $(vmImageName)
@@ -41,7 +41,7 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-  - job: Build Server
+  - job: Build_Server
     displayName: Build Server
     pool:
       vmImage: $(vmImageName)
@@ -55,7 +55,7 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-  - job: Build Worker
+  - job: Build_Worker
     displayName: Build Worker
     pool:
       vmImage: $(vmImageName)
