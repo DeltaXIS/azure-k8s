@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: {#serverimage#}
+          image: #{serverimage}#
           ports:
             - containerPort: 5000
           env:
