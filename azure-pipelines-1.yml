@@ -21,6 +21,36 @@ stages:
 - stage: Build
   displayName: Build and push stage
   jobs:  
+  - job: Build_Client
+    displayName: Build Client
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryClient)
+        dockerfile: $(dockerfilePathClient)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          
+  - job: Build_Server
+    displayName: Build Server
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryServer)
+        dockerfile: $(dockerfilePathServer)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+
   - job: Build_Worker
     displayName: Build Worker
     pool:
