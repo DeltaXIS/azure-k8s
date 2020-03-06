@@ -9,19 +9,13 @@ resources:
 - repo: self
 
 variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '584e0c63-2d05-43d0-8481-4eb9e773db66'
-  containerRegistry: 'deltak8s.azurecr.io'
-  imageRepositoryClient: 'deltaxisclient'
-  dockerfilePathClient: '$(Build.SourcesDirectory)/client/Dockerfile'
-  imageRepositoryWorker: 'deltaxisworker'
-  dockerfilePathWorker: '$(Build.SourcesDirectory)/worker/Dockerfile'
-  imageRepositoryServer: 'deltaxisserver'
-  dockerfilePathServer: '$(Build.SourcesDirectory)/server/Dockerfile'
-  tag: '$(Build.BuildId)'
-  
+- group: K8sVariableGroup
+- name: tag
+  value: '$(Build.BuildId)'
+
   # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+- name: vmImageName
+  value: 'ubuntu-latest'
 
 stages:
 - stage: Build
@@ -32,6 +26,43 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryClient)
+        dockerfile: $(dockerfilePathClient)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+  - job: Build_Server
+    displayName: Build Server
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryServer)
+        dockerfile: $(dockerfilePathServer)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+  - job: Build_Worker
+    displayName: Build Worker
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryWorker)
+        dockerfile: $(dockerfilePathWorker)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Pipeline.Workspace)/manifests/'
